@@ -44,17 +44,19 @@ const calculateOvertime = (
 ): { overtimeMinutes: number } => {
   const period1 = timeToMinutes(saida1) - timeToMinutes(entrada1);
   const period2 = timeToMinutes(saida2) - timeToMinutes(entrada2);
-  const totalMinutes = (period1 > 0 ? period1 : 0) + (period2 > 0 ? period2 : 0);
+  const totalMinutes = period1 + period2;
   if (holiday) return { overtimeMinutes: totalMinutes };
   const standardMinutes = 8 * 60;
-  const overtimeMinutes = totalMinutes > standardMinutes ? totalMinutes - standardMinutes : 0;
+  const overtimeMinutes = totalMinutes - standardMinutes;
   return { overtimeMinutes };
 };
 
 const formatMinutesToHHMM = (mins: number): string => {
-  const hours = Math.floor(mins / 60);
-  const minutes = mins % 60;
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  const sign = mins < 0 ? '-' : '';
+  const absMins = Math.abs(mins);
+  const hours = Math.floor(absMins / 60);
+  const minutes = absMins % 60;
+  return `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 };
 
 function App() {
@@ -100,6 +102,17 @@ function App() {
     return sum + overtimeMinutes;
   }, 0);
 
+  const totalNegativeOvertimeMinutes = days.reduce((sum, day) => {
+    const { overtimeMinutes } = calculateOvertime(
+      day.entrada1 || '09:00',
+      day.saida1 || '12:00',
+      day.entrada2 || '13:00',
+      day.saida2 || '18:00',
+      day.holiday
+    );
+    return overtimeMinutes < 0 ? sum + overtimeMinutes : sum;
+  }, 0);
+
   const handleExport = () => {
     const data = JSON.stringify(days, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
@@ -140,21 +153,36 @@ function App() {
       <Typography variant="h4" gutterBottom align="center">
         Calculadora de Horas Extras
       </Typography>
-      <Typography
-        variant="h5"
-        align="center"
-        sx={{
-          backgroundColor: '#2196F3',
-          color: 'white',
-          px: 3,
-          py: 1,
-          borderRadius: 2,
-          mb: 2,
-          boxShadow: 3
-        }}
-      >
-        Saldo Total: {formatMinutesToHHMM(totalOvertimeMinutes)}
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
+        <Typography
+          variant="h5"
+          align="center"
+          sx={{
+            backgroundColor: '#2196F3',
+            color: 'white',
+            px: 3,
+            py: 1,
+            borderRadius: 2,
+            boxShadow: 3
+          }}
+        >
+          Saldo Total: {formatMinutesToHHMM(totalOvertimeMinutes)}
+        </Typography>
+        <Typography
+          variant="h5"
+          align="center"
+          sx={{
+            backgroundColor: '#f44336',
+            color: 'white',
+            px: 3,
+            py: 1,
+            borderRadius: 2,
+            boxShadow: 3
+          }}
+        >
+          Horas Negativas (já contabilizado no total): {formatMinutesToHHMM(totalNegativeOvertimeMinutes)}
+        </Typography>
+      </Box>
       <TableContainer component={Paper} sx={{ mt: 2, maxWidth: 900 }}>
         <Table>
           <TableHead>
