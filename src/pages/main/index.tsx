@@ -73,10 +73,10 @@ function App() {
       id: Date.now(),
       date: new Date().toISOString().split('T')[0],
       holiday: false,
-      entrada1: '',
-      saida1: '',
-      entrada2: '',
-      saida2: ''
+      entrada1: '09:00',
+      saida1: '12:00',
+      entrada2: '13:00',
+      saida2: '18:00'
     };
     setDays(prev => [...prev, newDay]);
   };
@@ -131,6 +131,11 @@ function App() {
     localStorage.removeItem('days');
   };
 
+  const dateCounts = days.reduce((acc, day) => {
+    acc[day.date] = (acc[day.date] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 4 }}>
       <Typography variant="h4" gutterBottom align="center">
@@ -167,15 +172,20 @@ function App() {
           <TableBody>
             {days.map(day => {
               const { overtimeMinutes } = calculateOvertime(
-                day.entrada1 || '00:00',
-                day.saida1 || '00:00',
-                day.entrada2 || '00:00',
-                day.saida2 || '00:00',
+                day.entrada1 || '09:00',
+                day.saida1 || '12:00',
+                day.entrada2 || '13:00',
+                day.saida2 || '18:00',
                 day.holiday
               );
               return (
                 <TableRow key={day.id}>
-                  <TableCell align="center">
+                  <TableCell
+                    align="center"
+                    sx={{
+                      backgroundColor: dateCounts[day.date] > 1 ? '#ee3547' : 'inherit'
+                    }}
+                  >
                     <TextField
                       type="date"
                       value={day.date}
@@ -196,7 +206,7 @@ function App() {
                   <TableCell align="center">
                     <TextField
                       type="time"
-                      value={day.entrada1 === '' ? '00:00' : day.entrada1}
+                      value={day.entrada1 === '' ? '09:00' : day.entrada1}
                       onChange={e => updateDay(day.id, 'entrada1', e.target.value)}
                       inputProps={{ step: 300 }}
                       variant="standard"
@@ -205,7 +215,7 @@ function App() {
                   <TableCell align="center">
                     <TextField
                       type="time"
-                      value={day.saida1 === '' ? '00:00' : day.saida1}
+                      value={day.saida1 === '' ? '12:00' : day.saida1}
                       onChange={e => updateDay(day.id, 'saida1', e.target.value)}
                       inputProps={{ step: 300 }}
                       variant="standard"
@@ -214,7 +224,7 @@ function App() {
                   <TableCell align="center">
                     <TextField
                       type="time"
-                      value={day.entrada2 === '' ? '00:00' : day.entrada2}
+                      value={day.entrada2 === '' ? '13:00' : day.entrada2}
                       onChange={e => updateDay(day.id, 'entrada2', e.target.value)}
                       inputProps={{ step: 300 }}
                       variant="standard"
@@ -223,7 +233,7 @@ function App() {
                   <TableCell align="center">
                     <TextField
                       type="time"
-                      value={day.saida2 === '' ? '00:00' : day.saida2}
+                      value={day.saida2 === '' ? '18:00' : day.saida2}
                       onChange={e => updateDay(day.id, 'saida2', e.target.value)}
                       inputProps={{ step: 300 }}
                       variant="standard"
