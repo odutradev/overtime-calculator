@@ -17,7 +17,6 @@ import {
 import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadIcon from '@mui/icons-material/UploadFile';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
 
 const timeToMinutes = (timeStr: string): number => {
@@ -129,11 +128,6 @@ function App() {
       }
     };
     reader.readAsText(file);
-  };
-
-  const handleReset = () => {
-    setDays([]);
-    localStorage.removeItem('days');
   };
 
   const dateCounts = days.reduce((acc, day) => {
@@ -268,11 +262,6 @@ function App() {
         <Tooltip title="Importar dados">
           <IconButton onClick={handleImportClick} sx={{ color: '#2196F3' }}>
             <UploadIcon fontSize="large" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Resetar dados">
-          <IconButton onClick={handleReset} sx={{ color: '#2196F3' }}>
-            <RestartAltIcon fontSize="large" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Adicionar dia">
