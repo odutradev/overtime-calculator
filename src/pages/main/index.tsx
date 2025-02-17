@@ -18,6 +18,7 @@ import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadIcon from '@mui/icons-material/UploadFile';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const timeToMinutes = (timeStr: string): number => {
   if (!timeStr) return 0;
@@ -83,6 +84,10 @@ function App() {
 
   const updateDay = <K extends keyof Day>(id: number, field: K, value: Day[K]) => {
     setDays(prev => prev.map(day => (day.id === id ? { ...day, [field]: value } : day)));
+  };
+
+  const removeDay = (id: number) => {
+    setDays(prev => prev.filter(day => day.id !== id));
   };
 
   const totalOvertimeMinutes = days.reduce((sum, day) => {
@@ -167,6 +172,7 @@ function App() {
               <TableCell align="center">Entrada 2</TableCell>
               <TableCell align="center">Saída 2</TableCell>
               <TableCell align="center">Saldo do Dia</TableCell>
+              <TableCell align="center">Remover</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -183,7 +189,7 @@ function App() {
                   <TableCell
                     align="center"
                     sx={{
-                      backgroundColor: dateCounts[day.date] > 1 ? '#ee3547' : 'inherit'
+                      backgroundColor: dateCounts[day.date] > 1 ? '#e03b4b' : 'inherit'
                     }}
                   >
                     <TextField
@@ -240,6 +246,13 @@ function App() {
                     />
                   </TableCell>
                   <TableCell align="center">{formatMinutesToHHMM(overtimeMinutes)}</TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="Remover dia">
+                      <IconButton onClick={() => removeDay(day.id)} sx={{ color: '#2196F3' }}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
                 </TableRow>
               );
             })}
