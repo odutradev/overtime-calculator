@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Box,
+  Checkbox,
   IconButton,
   Table,
   TableBody,
@@ -27,6 +28,7 @@ const timeToMinutes = (timeStr: string): number => {
 interface Day {
   id: number;
   date: string;
+  holiday: boolean;
   entrada1: string;
   saida1: string;
   entrada2: string;
@@ -37,11 +39,13 @@ const calculateOvertime = (
   entrada1: string,
   saida1: string,
   entrada2: string,
-  saida2: string
+  saida2: string,
+  holiday: boolean
 ): { overtimeMinutes: number } => {
   const period1 = timeToMinutes(saida1) - timeToMinutes(entrada1);
   const period2 = timeToMinutes(saida2) - timeToMinutes(entrada2);
   const totalMinutes = (period1 > 0 ? period1 : 0) + (period2 > 0 ? period2 : 0);
+  if (holiday) return { overtimeMinutes: totalMinutes };
   const standardMinutes = 8 * 60;
   const overtimeMinutes = totalMinutes > standardMinutes ? totalMinutes - standardMinutes : 0;
   return { overtimeMinutes };
@@ -68,6 +72,7 @@ function App() {
     const newDay: Day = {
       id: Date.now(),
       date: new Date().toISOString().split('T')[0],
+      holiday: false,
       entrada1: '',
       saida1: '',
       entrada2: '',
@@ -76,18 +81,17 @@ function App() {
     setDays(prev => [...prev, newDay]);
   };
 
-  const updateDay = (id: number, field: keyof Day, value: string) => {
-    setDays(prev =>
-      prev.map(day => (day.id === id ? { ...day, [field]: value } : day))
-    );
+  const updateDay = <K extends keyof Day>(id: number, field: K, value: Day[K]) => {
+    setDays(prev => prev.map(day => (day.id === id ? { ...day, [field]: value } : day)));
   };
 
   const totalOvertimeMinutes = days.reduce((sum, day) => {
     const { overtimeMinutes } = calculateOvertime(
-      day.entrada1 || '00:00',
-      day.saida1 || '00:00',
-      day.entrada2 || '00:00',
-      day.saida2 || '00:00'
+      day.entrada1 || '09:00',
+      day.saida1 || '12:00',
+      day.entrada2 || '13:00',
+      day.saida2 || '18:00',
+      day.holiday
     );
     return sum + overtimeMinutes;
   }, 0);
@@ -114,9 +118,7 @@ function App() {
     reader.onload = event => {
       try {
         const importedDays = JSON.parse(event.target?.result as string);
-        if (Array.isArray(importedDays)) {
-          setDays(importedDays);
-        }
+        if (Array.isArray(importedDays)) setDays(importedDays);
       } catch (err) {
         console.error('Erro ao importar dados', err);
       }
@@ -154,6 +156,7 @@ function App() {
           <TableHead>
             <TableRow>
               <TableCell align="center">Data</TableCell>
+              <TableCell align="center">Feriado</TableCell>
               <TableCell align="center">Entrada 1</TableCell>
               <TableCell align="center">Saída 1</TableCell>
               <TableCell align="center">Entrada 2</TableCell>
@@ -167,7 +170,8 @@ function App() {
                 day.entrada1 || '00:00',
                 day.saida1 || '00:00',
                 day.entrada2 || '00:00',
-                day.saida2 || '00:00'
+                day.saida2 || '00:00',
+                day.holiday
               );
               return (
                 <TableRow key={day.id}>
@@ -177,6 +181,16 @@ function App() {
                       value={day.date}
                       onChange={e => updateDay(day.id, 'date', e.target.value)}
                       variant="standard"
+                    />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Checkbox
+                      checked={day.holiday}
+                      onChange={e => updateDay(day.id, 'holiday', e.target.checked)}
+                      sx={{
+                        color: '#2196F3',
+                        '&.Mui-checked': { color: '#2196F3' }
+                      }}
                     />
                   </TableCell>
                   <TableCell align="center">
@@ -215,9 +229,7 @@ function App() {
                       variant="standard"
                     />
                   </TableCell>
-                  <TableCell align="center">
-                    {formatMinutesToHHMM(overtimeMinutes)}
-                  </TableCell>
+                  <TableCell align="center">{formatMinutesToHHMM(overtimeMinutes)}</TableCell>
                 </TableRow>
               );
             })}
