@@ -512,14 +512,15 @@ function App() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {calculateOvertimeByMonth().map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
+                    {calculateOvertimeByMonth().map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
                     </Pie>
                     <RechartsTooltip 
-                      formatter={(value: any, name: string, props: any) => [props.payload.formattedValue, 'Horas extras']}
+                      formatter={(_, __, props: any) => [props.payload.formattedValue, 'Horas extras']}
                       contentStyle={{ backgroundColor: '#1e1e1e', borderColor: '#333', color: '#e0e0e0' }}
                     />
+
                     <Legend formatter={(value) => <span style={{ color: '#e0e0e0' }}>{value}</span>} />
                   </PieChart>
                 </ResponsiveContainer>
