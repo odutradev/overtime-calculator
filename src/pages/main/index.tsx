@@ -16,7 +16,12 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -64,13 +69,11 @@ const formatMinutesToHHMM = (mins: number): string => {
   return `${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 };
 
-// Função para extrair o ano e mês de uma data no formato "YYYY-MM-DD"
 const getYearMonth = (dateStr: string): string => {
   if (!dateStr) return '';
-  return dateStr.substring(0, 7); // Retorna "YYYY-MM"
+  return dateStr.substring(0, 7);
 };
 
-// Função para formatar o ano-mês para exibição
 const formatYearMonth = (yearMonth: string): string => {
   if (!yearMonth) return '';
   const [year, month] = yearMonth.split('-');
@@ -86,32 +89,24 @@ function App() {
     const stored = localStorage.getItem('days');
     return stored ? JSON.parse(stored) : [];
   });
-  
-  // Novo estado para armazenar o mês selecionado (formato: "YYYY-MM")
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
-    // Inicializa com o mês atual
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
-  
+  const [targetHours, setTargetHours] = useState<number | ''>('');
+  const [openModal, setOpenModal] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Cores para o gráfico de pizza
   const COLORS = ['#2196F3', '#4CAF50', '#FF9800', '#f44336', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63'];
 
   useEffect(() => {
     localStorage.setItem('days', JSON.stringify(days));
   }, [days]);
 
-  // Função para calcular a distribuição de horas extras por mês
   const calculateOvertimeByMonth = () => {
     const monthlyData: Record<string, number> = {};
-    
-    // Agrupar e somar horas extras positivas por mês
     days.forEach(day => {
       const yearMonth = getYearMonth(day.date);
       if (!yearMonth) return;
-      
       const { overtimeMinutes } = calculateOvertime(
         day.entrada1 || '09:00',
         day.saida1 || '12:00',
@@ -119,14 +114,10 @@ function App() {
         day.saida2 || '18:00',
         day.holiday
       );
-      
-      // Apenas considerar horas extras positivas para o gráfico
       if (overtimeMinutes > 0) {
         monthlyData[yearMonth] = (monthlyData[yearMonth] || 0) + overtimeMinutes;
       }
     });
-    
-    // Converter para o formato esperado pelo Recharts
     return Object.entries(monthlyData).map(([month, minutes]) => ({
       name: formatYearMonth(month),
       value: minutes,
@@ -136,26 +127,21 @@ function App() {
 
   const addDay = () => {
     const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
-  
     const daysInSelectedMonth = days
       .filter(day => {
         const [year, month] = day.date.split('-').map(Number);
         return year === selectedYear && month === selectedMonthNum;
       })
       .sort((a, b) => a.date.localeCompare(b.date));
-  
     let newDayNumber = 1;
     if (daysInSelectedMonth.length > 0) {
       const lastDay = daysInSelectedMonth[daysInSelectedMonth.length - 1];
       const lastDate = new Date(lastDay.date);
       newDayNumber = lastDate.getDate() + 1;
     }
-  
     const lastDayOfMonth = new Date(selectedYear, selectedMonthNum, 0).getDate();
     if (newDayNumber > lastDayOfMonth) newDayNumber = lastDayOfMonth;
-  
     const formattedDate = `${selectedYear}-${String(selectedMonthNum).padStart(2, '0')}-${String(newDayNumber).padStart(2, '0')}`;
-  
     const newDay: Day = {
       id: Date.now(),
       date: formattedDate,
@@ -165,10 +151,8 @@ function App() {
       entrada2: '13:00',
       saida2: '18:00'
     };
-  
     setDays(prev => [...prev, newDay]);
   };
-  
 
   const updateDay = <K extends keyof Day>(id: number, field: K, value: Day[K]) => {
     setDays(prev => prev.map(day => (day.id === id ? { ...day, [field]: value } : day)));
@@ -178,18 +162,9 @@ function App() {
     setDays(prev => prev.filter(day => day.id !== id));
   };
 
-  // Obtém lista única de meses disponíveis
   const availableMonths = [...new Set(days.map(day => getYearMonth(day.date)))].sort();
-
-  // Filtra dias pelo mês selecionado
   const filteredDays = days.filter(day => getYearMonth(day.date) === selectedMonth);
-  
-  // Ordena os dias por data (do menor para o maior)
-  const sortedFilteredDays = [...filteredDays].sort((a, b) => 
-    a.date.localeCompare(b.date)
-  );
-
-  // Calcula o saldo total (todos os meses)
+  const sortedFilteredDays = [...filteredDays].sort((a, b) => a.date.localeCompare(b.date));
   const totalOvertimeMinutes = days.reduce((sum, day) => {
     const { overtimeMinutes } = calculateOvertime(
       day.entrada1 || '09:00',
@@ -200,8 +175,6 @@ function App() {
     );
     return sum + overtimeMinutes;
   }, 0);
-
-  // Calcula o saldo total negativo (todos os meses)
   const totalNegativeOvertimeMinutes = days.reduce((sum, day) => {
     const { overtimeMinutes } = calculateOvertime(
       day.entrada1 || '09:00',
@@ -212,8 +185,6 @@ function App() {
     );
     return overtimeMinutes < 0 ? sum + overtimeMinutes : sum;
   }, 0);
-
-  // Calcula o saldo do mês selecionado
   const monthOvertimeMinutes = filteredDays.reduce((sum, day) => {
     const { overtimeMinutes } = calculateOvertime(
       day.entrada1 || '09:00',
@@ -224,8 +195,6 @@ function App() {
     );
     return sum + overtimeMinutes;
   }, 0);
-
-  // Calcula o saldo negativo do mês selecionado
   const monthNegativeOvertimeMinutes = filteredDays.reduce((sum, day) => {
     const { overtimeMinutes } = calculateOvertime(
       day.entrada1 || '09:00',
@@ -271,6 +240,15 @@ function App() {
     acc[day.date] = (acc[day.date] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+  
+  const targetMinutes = typeof targetHours === 'number' ? targetHours * 60 : 0;
+  const missingMinutes = typeof targetHours === 'number' ? Math.max(0, targetMinutes - totalOvertimeMinutes) : 0;
+  const alternatives = [
+    { label: '2 horas por dia', minutes: 120 },
+    { label: '1:30 por dia', minutes: 90 },
+    { label: '1 hora por dia', minutes: 60 },
+    { label: '30 minutos por dia', minutes: 30 }
+  ];
 
   return (
     <Box sx={{ 
@@ -285,8 +263,6 @@ function App() {
       <Typography variant="h4" gutterBottom align="center" sx={{ mb: 3, color: '#ffffff' }}>
         Calculadora de Horas Extras
       </Typography>
-      
-      {/* Painel de informações */}
       <Paper 
         elevation={3} 
         sx={{ 
@@ -299,7 +275,6 @@ function App() {
           border: '1px solid #333'
         }}
       >
-        {/* Cabeçalho do painel */}
         <Box sx={{ 
           bgcolor: '#2c2c2c', 
           color: '#ffffff', 
@@ -312,8 +287,6 @@ function App() {
           <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
             Painel de Controle
           </Typography>
-          
-          {/* Dropdown para seleção de mês */}
           <FormControl sx={{ minWidth: 220, bgcolor: '#121212', borderRadius: 1 }}>
             <InputLabel id="month-select-label" sx={{ color: '#9e9e9e' }}>Selecione o Mês</InputLabel>
             <Select
@@ -356,21 +329,17 @@ function App() {
             </Select>
           </FormControl>
         </Box>
-        
-        {/* Conteúdo do painel - mostra os saldos */}
         <Box sx={{ 
           p: 3, 
           display: 'flex',
           flexDirection: 'column',
           gap: 3
         }}>
-          {/* Parte superior - Saldo Total e Saldo do Mês */}
           <Box sx={{
             display: 'flex',
             flexDirection: { xs: 'column', md: 'row' },
             gap: 3
           }}>
-            {/* Saldo Total (Todos os Meses) */}
             <Box sx={{ 
               flex: 1, 
               p: 2, 
@@ -381,7 +350,6 @@ function App() {
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: '#bbbbbb' }}>
                 Saldo Total (Todos os Meses)
               </Typography>
-              
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box sx={{ 
                   display: 'flex', 
@@ -403,7 +371,6 @@ function App() {
                     {formatMinutesToHHMM(totalOvertimeMinutes)}
                   </Typography>
                 </Box>
-                
                 <Box sx={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -426,8 +393,6 @@ function App() {
                 </Box>
               </Box>
             </Box>
-            
-            {/* Saldo do Mês Selecionado */}
             <Box sx={{ 
               flex: 1, 
               p: 2, 
@@ -438,7 +403,6 @@ function App() {
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: '#bbbbbb' }}>
                 Saldo do Mês: {formatYearMonth(selectedMonth)}
               </Typography>
-              
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Box sx={{ 
                   display: 'flex', 
@@ -460,7 +424,6 @@ function App() {
                     {formatMinutesToHHMM(monthOvertimeMinutes)}
                   </Typography>
                 </Box>
-                
                 <Box sx={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -484,19 +447,17 @@ function App() {
               </Box>
             </Box>
           </Box>
-          
-          {/* Gráfico de Pizza - Distribuição de Horas Extras por Mês */}
           <Box sx={{ 
-            p: 2, 
-            border: '1px solid #333', 
+            width: '100%',
+            maxWidth: 900,
+            border: '1px solid #333',
             borderRadius: 2,
             bgcolor: '#252525',
-            width: '100%'
+            p: 2
           }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 2, color: '#bbbbbb', textAlign: 'center' }}>
               Distribuição de Horas Extras por Mês
             </Typography>
-            
             {calculateOvertimeByMonth().length > 0 ? (
               <Box sx={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
@@ -511,15 +472,14 @@ function App() {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                    {calculateOvertimeByMonth().map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
+                      {calculateOvertimeByMonth().map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
                     </Pie>
                     <RechartsTooltip 
                       formatter={(_, __, props: any) => [props.payload.formattedValue, 'Horas extras']}
                       contentStyle={{ backgroundColor: '#1e1e1e', borderColor: '#333', color: '#e0e0e0' }}
                     />
-
                     <Legend formatter={(value) => <span style={{ color: '#e0e0e0' }}>{value}</span>} />
                   </PieChart>
                 </ResponsiveContainer>
@@ -543,7 +503,44 @@ function App() {
           </Box>
         </Box>
       </Paper>
-      
+      <Paper sx={{ 
+        width: '100%', 
+        maxWidth: 900, 
+        mb: 4, 
+        borderRadius: 2,
+        overflow: 'hidden',
+        bgcolor: '#1e1e1e',
+        border: '1px solid #333',
+        p: 2
+      }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#ffffff' }}>
+          Meta de Horas
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <TextField
+            label="Meta (horas)"
+            type="number"
+            value={targetHours}
+            onChange={e => setTargetHours(e.target.value === '' ? '' : Number(e.target.value))}
+            variant="standard"
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& input': { color: '#e0e0e0' },
+              '& .MuiInput-underline:before': { borderBottomColor: '#555' },
+              '& .MuiInput-underline:hover:not(.Mui-disabled):before': { borderBottomColor: '#777' },
+              '& .MuiInput-underline:after': { borderBottomColor: '#2196F3' },
+              flex: 1
+            }}
+          />
+          <Box onClick={() => setOpenModal(true)} sx={{ cursor: 'pointer', p: 2, border: '1px solid #333', borderRadius: 2, bgcolor: '#252525', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Typography sx={{ color: '#e0e0e0', fontWeight: 'bold' }}>Meta: {targetHours !== '' ? `${targetHours} horas` : '---'}</Typography>
+            <Typography sx={{ color: '#e0e0e0', fontWeight: 'bold' }}>
+              {targetHours !== '' ? (targetMinutes <= totalOvertimeMinutes ? 'Meta Atingida' : `Faltam: ${formatMinutesToHHMM(targetMinutes - totalOvertimeMinutes)}`) : 'Meta não definida'}
+            </Typography>
+            <Typography sx={{ color: '#2196F3' }}>Clique para ver previsões</Typography>
+          </Box>
+        </Box>
+      </Paper>
       <TableContainer 
         component={Paper} 
         sx={{ 
@@ -765,6 +762,27 @@ function App() {
         onChange={handleImport}
         style={{ display: 'none' }}
       />
+      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+        <DialogTitle>Previsão para atingir a meta</DialogTitle>
+        <DialogContent>
+          {targetHours !== '' ? (
+            missingMinutes > 0 ? (
+              alternatives.map((option, index) => (
+                <Typography key={index} sx={{ mb: 1 }}>
+                  {option.label}: {Math.ceil(missingMinutes / option.minutes)} dia(s)
+                </Typography>
+              ))
+            ) : (
+              <Typography>Meta atingida!</Typography>
+            )
+          ) : (
+            <Typography>Meta não definida.</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenModal(false)} sx={{ color: '#2196F3' }}>Fechar</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
