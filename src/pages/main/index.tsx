@@ -478,7 +478,7 @@ function App() {
                     </Pie>
                     <RechartsTooltip 
                       formatter={(_, __, props: any) => [props.payload.formattedValue, 'Horas extras']}
-                      contentStyle={{ backgroundColor: '#1e1e1e', borderColor: '#333', color: '#e0e0e0' }}
+                      contentStyle={{ backgroundColor: '#262626', borderColor: '#333' }}
                     />
                     <Legend formatter={(value) => <span style={{ color: '#e0e0e0' }}>{value}</span>} />
                   </PieChart>
