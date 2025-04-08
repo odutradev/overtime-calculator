@@ -135,29 +135,27 @@ function App() {
   };
 
   const addDay = () => {
-    // Extrair ano e mês do mês selecionado
     const [selectedYear, selectedMonthNum] = selectedMonth.split('-').map(Number);
-    
-    // Obter data atual
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1; // getMonth() retorna 0-11
-    const currentDay = now.getDate();
-    
-    // Determinar o dia a ser usado
-    let dayToUse: number;
-    
-    // Se for o mês atual, use o dia atual
-    if (selectedYear === currentYear && selectedMonthNum === currentMonth) {
-      dayToUse = currentDay;
-    } else {
-      // Se for outro mês, use o dia 15 (meio do mês)
-      dayToUse = 15;
+  
+    const daysInSelectedMonth = days
+      .filter(day => {
+        const [year, month] = day.date.split('-').map(Number);
+        return year === selectedYear && month === selectedMonthNum;
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
+  
+    let newDayNumber = 1;
+    if (daysInSelectedMonth.length > 0) {
+      const lastDay = daysInSelectedMonth[daysInSelectedMonth.length - 1];
+      const lastDate = new Date(lastDay.date);
+      newDayNumber = lastDate.getDate() + 1;
     }
-    
-    // Criar a data no formato YYYY-MM-DD
-    const formattedDate = `${selectedYear}-${String(selectedMonthNum).padStart(2, '0')}-${String(dayToUse).padStart(2, '0')}`;
-    
+  
+    const lastDayOfMonth = new Date(selectedYear, selectedMonthNum, 0).getDate();
+    if (newDayNumber > lastDayOfMonth) newDayNumber = lastDayOfMonth;
+  
+    const formattedDate = `${selectedYear}-${String(selectedMonthNum).padStart(2, '0')}-${String(newDayNumber).padStart(2, '0')}`;
+  
     const newDay: Day = {
       id: Date.now(),
       date: formattedDate,
@@ -167,9 +165,10 @@ function App() {
       entrada2: '13:00',
       saida2: '18:00'
     };
-    
+  
     setDays(prev => [...prev, newDay]);
   };
+  
 
   const updateDay = <K extends keyof Day>(id: number, field: K, value: Day[K]) => {
     setDays(prev => prev.map(day => (day.id === id ? { ...day, [field]: value } : day)));
