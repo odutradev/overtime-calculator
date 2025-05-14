@@ -27,83 +27,14 @@ import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import UploadIcon from "@mui/icons-material/UploadFile";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip as RechartsTooltip,
-  Legend,
-} from "recharts";
 
-const timeToMinutes = (timeStr: string): number => {
-  if (!timeStr) return 0;
-  const [hours, minutes] = timeStr.split(":").map(Number);
-  return hours * 60 + minutes;
-};
 
-interface Day {
-  id: number;
-  date: string;
-  holiday: boolean;
-  entrada1: string;
-  saida1: string;
-  entrada2: string;
-  saida2: string;
-}
+import { calculateOvertime, formatMinutesToHHMM, getYearMonth, formatYearMonth } from "./utils";
+import type { Day } from "./types";
+import Charts from "./components/charts";
+import {ChartData} from "./components/charts/types";
 
-const calculateOvertime = (
-  entrada1: string,
-  saida1: string,
-  entrada2: string,
-  saida2: string,
-  holiday: boolean
-): { overtimeMinutes: number } => {
-  const period1 = timeToMinutes(saida1) - timeToMinutes(entrada1);
-  const period2 = timeToMinutes(saida2) - timeToMinutes(entrada2);
-  const totalMinutes = period1 + period2;
-  if (holiday) return { overtimeMinutes: totalMinutes };
-  const standardMinutes = 8 * 60;
-  const overtimeMinutes = totalMinutes - standardMinutes;
-  return { overtimeMinutes };
-};
-
-const formatMinutesToHHMM = (mins: number): string => {
-  const sign = mins < 0 ? "-" : "";
-  const absMins = Math.abs(mins);
-  const hours = Math.floor(absMins / 60);
-  const minutes = absMins % 60;
-  return `${sign}${hours.toString().padStart(2, "0")}:${minutes
-    .toString()
-    .padStart(2, "0")}`;
-};
-
-const getYearMonth = (dateStr: string): string => {
-  if (!dateStr) return "";
-  return dateStr.substring(0, 7);
-};
-
-const formatYearMonth = (yearMonth: string): string => {
-  if (!yearMonth) return "";
-  const [year, month] = yearMonth.split("-");
-  const monthNames = [
-    "Janeiro",
-    "Fevereiro",
-    "Março",
-    "Abril",
-    "Maio",
-    "Junho",
-    "Julho",
-    "Agosto",
-    "Setembro",
-    "Outubro",
-    "Novembro",
-    "Dezembro",
-  ];
-  return `${monthNames[parseInt(month) - 1]} de ${year}`;
-};
-
-const Page = () => {
+const App = () => {
   const [days, setDays] = useState<Day[]>(() => {
     const stored = localStorage.getItem("days");
     return stored ? JSON.parse(stored) : [];
@@ -121,16 +52,6 @@ const Page = () => {
   });
   const [openModal, setOpenModal] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const COLORS = [
-    "#2196F3",
-    "#4CAF50",
-    "#FF9800",
-    "#f44336",
-    "#9C27B0",
-    "#00BCD4",
-    "#FFEB3B",
-    "#E91E63",
-  ];
 
   useEffect(() => {
     localStorage.setItem("days", JSON.stringify(days));
@@ -167,6 +88,12 @@ const Page = () => {
       formattedValue: formatMinutesToHHMM(minutes),
     }));
   };
+
+    const chartData: ChartData[] = calculateOvertimeByMonth().map(({ name, value, formattedValue }) => ({
+    name,
+    value,
+    formattedValue,
+  }));
 
   const addDay = () => {
     const [selectedYear, selectedMonthNum] = selectedMonth
@@ -586,66 +513,11 @@ const Page = () => {
             >
               Distribuição de Horas Extras por Mês
             </Typography>
-            {calculateOvertimeByMonth().length > 0 ? (
-              <Box sx={{ height: 300 }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={calculateOvertimeByMonth()}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={true}
-                      label={({ name, percent }) =>
-                        `${name}: ${(percent * 100).toFixed(0)}%`
-                      }
-                      outerRadius={100}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {calculateOvertimeByMonth().map((_, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip
-                      formatter={(_, __, props: any) => [
-                        props.payload.formattedValue,
-                        "Horas extras",
-                      ]}
-                      contentStyle={{
-                        backgroundColor: "#262626",
-                        borderColor: "#333",
-                      }}
-                    />
-                    <Legend
-                      formatter={(value) => (
-                        <span style={{ color: "#e0e0e0" }}>{value}</span>
-                      )}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Box>
-            ) : (
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  height: 200,
-                  color: "#888",
-                  border: "1px dashed #555",
-                  borderRadius: 2,
-                  p: 2,
-                }}
-              >
-                <Typography>
-                  Não há dados suficientes para gerar o gráfico. Adicione dias
-                  com horas extras positivas.
-                </Typography>
-              </Box>
-            )}
+      <Charts
+        data={chartData}
+        width="100%"
+        height={300}
+      />
           </Box>
         </Box>
       </Paper>
@@ -1076,4 +948,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default App;
