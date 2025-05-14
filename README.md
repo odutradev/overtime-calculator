@@ -1,50 +1,71 @@
-# React + TypeScript + Vite
+# Calculadora de Horas Extras
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Uma aplicação web para registrar e calcular horas extras de trabalho, permitindo ao usuário acompanhar saldos diários e mensais, além de definir metas e gerar previsões.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🔗 Demo
 
-## Expanding the ESLint configuration
+Acesse o projeto em produção: [calculadora-de-horas.odutra.com](https://calculadora-de-horas.odutra.com/)
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+---
 
-- Configure the top-level `parserOptions` property like this:
+## 🚀 Funcionalidades
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+* **Registro de dias**: Adicione entradas e saídas para dois períodos diários, marque feriados.
+* **Cálculo de horas extras**:
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+  * Exibe o saldo de horas (positivas e negativas) por dia.
+  * Soma automática do total de horas extras de todos os meses e do mês selecionado.
+* **Meta de horas**:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+  * Defina uma meta em horas.
+  * Armazene a meta no navegador e exiba status de cumprimento.
+  * Exiba previsões de quantos dias faltam para alcançar a meta com diferentes ritmos diários.
+* **Gráficos**: Visualização da distribuição de horas extras por mês utilizando gráficos de pizza.
+* **Exportar/Importar**:
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+  * Exporte os dados registrados em um arquivo JSON.
+  * Importe um arquivo JSON para restaurar ou compartilhar registros.
+
+---
+
+## 🛠 Tecnologias
+
+* **React** com **TypeScript**
+* **Material UI** para componentes de interface
+* **Recharts** para gráficos interativos
+* **localStorage** para persistência de dados no cliente
+
+---
+
+## ⚙️ Instalação e Execução Local
+
+1. Clone este repositório:
+
+   ```bash
+   git clone https://github.com/odutradev/calculadora-de-horas.git
+   cd calculadora-de-horas
+   ```
+2. Instale as dependências:
+
+   ```bash
+   npm install
+   ```
+3. Inicie o servidor de desenvolvimento:
+
+   ```bash
+   npm start
+   ```
+4. Abra [http://localhost:7100](http://localhost:7100) no navegador.
+
+
+## 👤 Autor
+
+**João Dutra** ([odutradev](https://github.com/odutradev))
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a [MIT License](LICENSE).
