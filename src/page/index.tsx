@@ -34,6 +34,7 @@ import { ChartData } from "./components/charts/types";
 import Summary from "./components/summary";
 import Target from "./components/target";
 import Table from "./components/table";
+import Forecast from "./components/forecast";
 
 const App = () => {
   const [days, setDays] = useState<Day[]>(() => {
@@ -441,30 +442,15 @@ const App = () => {
         onChange={handleImport}
         style={{ display: "none" }}
       />
-      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
-        <DialogTitle>Previsão para atingir a meta</DialogTitle>
-        <DialogContent>
-          {targetHours !== "" ? (
-            missingMinutes > 0 ? (
-              alternatives.map((option, index) => (
-                <Typography key={index} sx={{ mb: 1 }}>
-                  {option.label}: {Math.ceil(missingMinutes / option.minutes)}{" "}
-                  dia(s)
-                </Typography>
-              ))
-            ) : (
-              <Typography>Meta atingida!</Typography>
-            )
-          ) : (
-            <Typography>Meta não definida.</Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenModal(false)} sx={{ color: "#2196F3" }}>
-            Fechar
-          </Button>
-        </DialogActions>
-      </Dialog>
+
+                  <Forecast
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        targetHours={targetHours}
+        missingMinutes={missingMinutes}
+        alternatives={alternatives}
+      />
+
     </Box>
   );
 };
