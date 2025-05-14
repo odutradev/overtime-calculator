@@ -1,6 +1,6 @@
 export interface OvertimeTargetProps {
-  targetHours: number | '';
-  onChange: (value: number | '') => void;
-  totalOvertimeMinutes: number;
-  onOpenModal: () => void;
+    onChange: (value: number | '') => void;
+    totalOvertimeMinutes: number;
+    targetHours: number | '';
+    onOpenModal: () => void;
 }

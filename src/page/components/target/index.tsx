@@ -1,25 +1,12 @@
-import React from 'react';
 import { Paper, Box, Typography, TextField } from '@mui/material';
+
 import { formatMinutesToHHMM } from '../../utils';
+
 import type { OvertimeTargetProps } from './types';
 
-const OvertimeTarget: React.FC<OvertimeTargetProps> = ({
-  targetHours,
-  onChange,
-  totalOvertimeMinutes,
-  onOpenModal,
-}) => {
-  const targetMinutes =
-    typeof targetHours === 'number' ? targetHours * 60 : 0;
-
-  const statusText =
-    targetHours !== ''
-      ? targetMinutes <= totalOvertimeMinutes
-        ? 'Meta Atingida'
-        : `Faltam: ${formatMinutesToHHMM(
-            targetMinutes - totalOvertimeMinutes
-          )}`
-      : 'Meta não definida';
+const Target= ({ targetHours, onChange, totalOvertimeMinutes, onOpenModal }: OvertimeTargetProps) => {
+    const targetMinutes = typeof targetHours === 'number' ? targetHours * 60 : 0;
+    const statusText = targetHours !== '' ? targetMinutes <= totalOvertimeMinutes ? 'Meta Atingida' : `Faltam: ${formatMinutesToHHMM(targetMinutes - totalOvertimeMinutes)}`: 'Meta não definida';
 
   return (
     <Paper
@@ -89,4 +76,4 @@ const OvertimeTarget: React.FC<OvertimeTargetProps> = ({
   );
 };
 
-export default OvertimeTarget;
+export default Target;

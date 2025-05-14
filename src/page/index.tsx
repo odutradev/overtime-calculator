@@ -38,7 +38,7 @@ import type { Day } from "./types";
 import Charts from "./components/charts";
 import { ChartData } from "./components/charts/types";
 import Summary from "./components/summary";
-import OvertimeTarget from "./components/target";
+import Target from "./components/target";
 
 const App = () => {
   const [days, setDays] = useState<Day[]>(() => {
@@ -367,7 +367,7 @@ const App = () => {
         </Box>
       </Paper>
 
-      <OvertimeTarget
+      <Target
         targetHours={targetHours}
         onChange={setTargetHours}
         totalOvertimeMinutes={totalOvertimeMinutes}
