@@ -3,7 +3,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { createRoot } from 'react-dom/client';
 import { StrictMode } from 'react';
 
-import GlobalStyles from '@styles/globalStyles';
 import Router from '@routes/index';
 
 const darkTheme = createTheme({
@@ -15,7 +14,6 @@ const darkTheme = createTheme({
 const App = () => {
   return (
     <ThemeProvider theme={darkTheme}>
-      <GlobalStyles />
       <CssBaseline />
       <Router />
     </ThemeProvider>
