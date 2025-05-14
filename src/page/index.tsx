@@ -1,15 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Box,
-  Checkbox,
+
   IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
+
   Paper,
   Typography,
   Tooltip,
@@ -26,7 +20,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import UploadIcon from "@mui/icons-material/UploadFile";
-import DeleteIcon from "@mui/icons-material/Delete";
+
 
 import {
   calculateOvertime,
@@ -39,7 +33,7 @@ import Charts from "./components/charts";
 import { ChartData } from "./components/charts/types";
 import Summary from "./components/summary";
 import Target from "./components/target";
-import OvertimeTable from "./components/table";
+import Table from "./components/table";
 
 const App = () => {
   const [days, setDays] = useState<Day[]>(() => {
@@ -236,11 +230,6 @@ const App = () => {
     reader.readAsText(file);
   };
 
-  const dateCounts = days.reduce((acc, day) => {
-    acc[day.date] = (acc[day.date] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
   const targetMinutes = typeof targetHours === "number" ? targetHours * 60 : 0;
   const missingMinutes =
     typeof targetHours === "number"
@@ -375,8 +364,8 @@ const App = () => {
         onOpenModal={handleOpenModal}
       />
 
-    <OvertimeTable
-      days={days}
+    <Table
+      days={sortedFilteredDays}
       updateDay={updateDay}
       removeDay={removeDay}
     />

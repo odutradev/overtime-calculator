@@ -1,22 +1,12 @@
-import React from 'react';
-import {
-  TableContainer,
-  Paper,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  TextField,
-  Checkbox,
-  Tooltip,
-  IconButton,
-} from '@mui/material';
+import { TableContainer, Paper, Table as CustomTable, TableHead, TableRow, TableCell, TableBody, TextField, Checkbox, Tooltip, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+
 import { calculateOvertime, formatMinutesToHHMM } from '../../utils';
-import type {OvertimeTableProps } from './types';
-import { Day } from '../../types';
-const OvertimeTable: React.FC<OvertimeTableProps> = ({ days, updateDay, removeDay }) => {
+
+import type { OvertimeTableProps } from './types';
+import type { Day } from '../../types';
+
+const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
   const dateCounts = days.reduce((acc, day) => {
     acc[day.date] = (acc[day.date] || 0) + 1;
     return acc;
@@ -36,7 +26,7 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({ days, updateDay, removeDa
         boxShadow: '0 4px 6px rgba(0,0,0,0.4)',
       }}
     >
-      <Table>
+      <CustomTable>
         <TableHead>
           <TableRow sx={{ bgcolor: '#2c2c2c' }}>
             {[
@@ -164,9 +154,9 @@ const OvertimeTable: React.FC<OvertimeTableProps> = ({ days, updateDay, removeDa
             );
           })}
         </TableBody>
-      </Table>
+      </CustomTable>
     </TableContainer>
   );
 };
 
-export default OvertimeTable;
+export default Table;
