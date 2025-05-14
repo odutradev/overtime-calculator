@@ -1,16 +1,10 @@
-// src/components/OvertimeSummary/index.tsx
-import React from 'react';
 import { Box, Typography } from '@mui/material';
+
 import { formatMinutesToHHMM, formatYearMonth } from '../../utils';
+
 import type { OvertimeSummaryProps } from './types';
 
-const Summary: React.FC<OvertimeSummaryProps> = ({
-  totalOvertimeMinutes,
-  totalNegativeOvertimeMinutes,
-  monthOvertimeMinutes,
-  monthNegativeOvertimeMinutes,
-  selectedMonth,
-}) => {
+const Summary = ({ totalOvertimeMinutes, totalNegativeOvertimeMinutes, monthOvertimeMinutes, monthNegativeOvertimeMinutes, selectedMonth }: OvertimeSummaryProps) => {
   const panels = [
     {
       title: 'Saldo Total (Todos os Meses)',
