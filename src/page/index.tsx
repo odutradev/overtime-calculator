@@ -33,6 +33,7 @@ import { calculateOvertime, formatMinutesToHHMM, getYearMonth, formatYearMonth }
 import type { Day } from "./types";
 import Charts from "./components/charts";
 import {ChartData} from "./components/charts/types";
+import Summary from "./components/summary";
 
 const App = () => {
   const [days, setDays] = useState<Day[]>(() => {
@@ -336,6 +337,12 @@ const App = () => {
             </Select>
           </FormControl>
         </Box>
+        
+
+
+
+
+
         <Box
           sx={{
             p: 3,
@@ -344,154 +351,15 @@ const App = () => {
             gap: 3,
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", md: "row" },
-              gap: 3,
-            }}
-          >
-            <Box
-              sx={{
-                flex: 1,
-                p: 2,
-                border: "1px solid #333",
-                borderRadius: 2,
-                bgcolor: "#252525",
-              }}
-            >
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: "bold", mb: 2, color: "#bbbbbb" }}
-              >
-                Saldo Total (Todos os Meses)
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    p: 1.5,
-                    borderRadius: 1,
-                    bgcolor: "rgba(33, 150, 243, 0.08)",
-                    border: "1px solid rgba(33, 150, 243, 0.3)",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      bgcolor: "#2196F3",
-                      mr: 1.5,
-                    }}
-                  />
-                  <Typography sx={{ flex: 1, color: "#e0e0e0" }}>
-                    Saldo Total:
-                  </Typography>
-                  <Typography sx={{ fontWeight: "bold", color: "#2196F3" }}>
-                    {formatMinutesToHHMM(totalOvertimeMinutes)}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    p: 1.5,
-                    borderRadius: 1,
-                    bgcolor: "rgba(244, 67, 54, 0.08)",
-                    border: "1px solid rgba(244, 67, 54, 0.3)",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      bgcolor: "#f44336",
-                      mr: 1.5,
-                    }}
-                  />
-                  <Typography sx={{ flex: 1, color: "#e0e0e0" }}>
-                    Horas Negativas:
-                  </Typography>
-                  <Typography sx={{ fontWeight: "bold", color: "#f44336" }}>
-                    {formatMinutesToHHMM(totalNegativeOvertimeMinutes)}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-            <Box
-              sx={{
-                flex: 1,
-                p: 2,
-                border: "1px solid #333",
-                borderRadius: 2,
-                bgcolor: "#252525",
-              }}
-            >
-              <Typography
-                variant="subtitle1"
-                sx={{ fontWeight: "bold", mb: 2, color: "#bbbbbb" }}
-              >
-                Saldo do Mês: {formatYearMonth(selectedMonth)}
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    p: 1.5,
-                    borderRadius: 1,
-                    bgcolor: "rgba(76, 175, 80, 0.08)",
-                    border: "1px solid rgba(76, 175, 80, 0.3)",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      bgcolor: "#4CAF50",
-                      mr: 1.5,
-                    }}
-                  />
-                  <Typography sx={{ flex: 1, color: "#e0e0e0" }}>
-                    Saldo do Mês:
-                  </Typography>
-                  <Typography sx={{ fontWeight: "bold", color: "#4CAF50" }}>
-                    {formatMinutesToHHMM(monthOvertimeMinutes)}
-                  </Typography>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    p: 1.5,
-                    borderRadius: 1,
-                    bgcolor: "rgba(255, 152, 0, 0.08)",
-                    border: "1px solid rgba(255, 152, 0, 0.3)",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      bgcolor: "#FF9800",
-                      mr: 1.5,
-                    }}
-                  />
-                  <Typography sx={{ flex: 1, color: "#e0e0e0" }}>
-                    Horas Negativas do Mês:
-                  </Typography>
-                  <Typography sx={{ fontWeight: "bold", color: "#FF9800" }}>
-                    {formatMinutesToHHMM(monthNegativeOvertimeMinutes)}
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
-          </Box>
+    <Summary
+      totalOvertimeMinutes={totalOvertimeMinutes}
+      totalNegativeOvertimeMinutes={totalNegativeOvertimeMinutes}
+      monthOvertimeMinutes={monthOvertimeMinutes}
+      monthNegativeOvertimeMinutes={monthNegativeOvertimeMinutes}
+      selectedMonth={selectedMonth}
+    />
+
+
           <Box
             sx={{
               width: "100%",
@@ -520,6 +388,8 @@ const App = () => {
       />
           </Box>
         </Box>
+
+        
       </Paper>
       <Paper
         sx={{
