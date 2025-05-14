@@ -93,7 +93,10 @@ function App() {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
-  const [targetHours, setTargetHours] = useState<number | ''>('');
+const [targetHours, setTargetHours] = useState<number | ''>(() => {
+  const saved = localStorage.getItem('targetHours');
+  return saved !== null ? Number(saved) : '';
+});
   const [openModal, setOpenModal] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const COLORS = ['#2196F3', '#4CAF50', '#FF9800', '#f44336', '#9C27B0', '#00BCD4', '#FFEB3B', '#E91E63'];
@@ -101,6 +104,14 @@ function App() {
   useEffect(() => {
     localStorage.setItem('days', JSON.stringify(days));
   }, [days]);
+
+  useEffect(() => {
+    if (targetHours === '') {
+      localStorage.removeItem('targetHours');
+    } else {
+      localStorage.setItem('targetHours', String(targetHours));
+    }
+  }, [targetHours]);
 
   const calculateOvertimeByMonth = () => {
     const monthlyData: Record<string, number> = {};
