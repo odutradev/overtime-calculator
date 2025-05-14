@@ -1,71 +1,70 @@
-# Calculadora de Horas Extras
+# Overtime Calculator
 
-Uma aplicação web para registrar e calcular horas extras de trabalho, permitindo ao usuário acompanhar saldos diários e mensais, além de definir metas e gerar previsões.
+A web application for recording and calculating work overtime hours, allowing users to track daily and monthly balances, as well as set goals and generate forecasts.
 
 ---
 
 ## 🔗 Demo
 
-Acesse o projeto em produção: [calculadora-de-horas.odutra.com](https://calculadora-de-horas.odutra.com/)
+Access the live project: [overtime-calculator.odutra.com](https://overtime-calculator.odutra.com/)
 
 ---
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-* **Registro de dias**: Adicione entradas e saídas para dois períodos diários, marque feriados.
-* **Cálculo de horas extras**:
+* **Day Registration**: Add clock-in and clock-out times for two daily periods, and mark holidays.
+* **Overtime Calculation**:
 
-  * Exibe o saldo de horas (positivas e negativas) por dia.
-  * Soma automática do total de horas extras de todos os meses e do mês selecionado.
-* **Meta de horas**:
+  * Displays daily hour balances (positive and negative).
+  * Automatically sums total overtime hours across all months and for the selected month.
+* **Hour Goals**:
 
-  * Defina uma meta em horas.
-  * Armazene a meta no navegador e exiba status de cumprimento.
-  * Exiba previsões de quantos dias faltam para alcançar a meta com diferentes ritmos diários.
-* **Gráficos**: Visualização da distribuição de horas extras por mês utilizando gráficos de pizza.
-* **Exportar/Importar**:
+  * Set a goal in hours.
+  * Store the goal in the browser and display its completion status.
+  * Show forecasts estimating how many days remain to reach the goal at different daily paces.
+* **Charts**: Visualize the distribution of overtime hours per month using pie charts.
+* **Export/Import**:
 
-  * Exporte os dados registrados em um arquivo JSON.
-  * Importe um arquivo JSON para restaurar ou compartilhar registros.
-
----
-
-## 🛠 Tecnologias
-
-* **React** com **TypeScript**
-* **Material UI** para componentes de interface
-* **Recharts** para gráficos interativos
-* **localStorage** para persistência de dados no cliente
+  * Export recorded data to a JSON file.
+  * Import a JSON file to restore or share your records.
 
 ---
 
-## ⚙️ Instalação e Execução Local
+## 🛠 Technologies
 
-1. Clone este repositório:
+* **React** with **TypeScript**
+* **Material UI** for UI components
+* **Recharts** for interactive charts
+* **localStorage** for client-side data persistence
+
+---
+
+## ⚙️ Installation & Local Development
+
+1. Clone this repository:
 
    ```bash
    git clone https://github.com/odutradev/calculadora-de-horas.git
    cd calculadora-de-horas
    ```
-2. Instale as dependências:
+2. Install dependencies:
 
    ```bash
    npm install
    ```
-3. Inicie o servidor de desenvolvimento:
+3. Start the development server:
 
    ```bash
    npm start
    ```
-4. Abra [http://localhost:7100](http://localhost:7100) no navegador.
-
-
-## 👤 Autor
-
-**João Dutra** ([odutradev](https://github.com/odutradev))
+4. Open [http://localhost:7100](http://localhost:7100) in your browser.
 
 ---
 
-## 📄 Licença
+## 👤 Author
 
-Este projeto está licenciado sob a [MIT License](LICENSE).
+**João Dutra** ([odutradev](https://github.com/odutradev))
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
