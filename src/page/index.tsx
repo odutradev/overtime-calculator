@@ -103,7 +103,7 @@ const formatYearMonth = (yearMonth: string): string => {
   return `${monthNames[parseInt(month) - 1]} de ${year}`;
 };
 
-const App = () => {
+const Page = () => {
   const [days, setDays] = useState<Day[]>(() => {
     const stored = localStorage.getItem("days");
     return stored ? JSON.parse(stored) : [];
@@ -1076,4 +1076,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Page;
