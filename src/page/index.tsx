@@ -1,40 +1,18 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Box,
-
-  IconButton,
-
-  Paper,
-  Typography,
-  Tooltip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import DownloadIcon from "@mui/icons-material/Download";
+import { Box, IconButton, Paper, Typography, Tooltip, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import UploadIcon from "@mui/icons-material/UploadFile";
+import DownloadIcon from "@mui/icons-material/Download";
+import AddIcon from "@mui/icons-material/Add";
 
-
-import {
-  calculateOvertime,
-  formatMinutesToHHMM,
-  getYearMonth,
-  formatYearMonth,
-} from "./utils";
-import type { Day } from "./types";
-import Charts from "./components/charts";
-import { ChartData } from "./components/charts/types";
+import { calculateOvertime, formatMinutesToHHMM, getYearMonth, formatYearMonth } from "./utils";
+import Forecast from "./components/forecast";
 import Summary from "./components/summary";
+import Charts from "./components/charts";
 import Target from "./components/target";
 import Table from "./components/table";
-import Forecast from "./components/forecast";
+
+import type { ChartData } from "./components/charts/types";
+import type { Day } from "./types";
 
 const App = () => {
   const [days, setDays] = useState<Day[]>(() => {
@@ -43,10 +21,7 @@ const App = () => {
   });
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}`;
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2,"0")}`;
   });
   const [targetHours, setTargetHours] = useState<number | "">(() => {
     const saved = localStorage.getItem("targetHours");
@@ -236,12 +211,6 @@ const App = () => {
     typeof targetHours === "number"
       ? Math.max(0, targetMinutes - totalOvertimeMinutes)
       : 0;
-  const alternatives = [
-    { label: "2 horas por dia", minutes: 120 },
-    { label: "1:30 por dia", minutes: 90 },
-    { label: "1 hora por dia", minutes: 60 },
-    { label: "30 minutos por dia", minutes: 30 },
-  ];
 
   const handleOpenModal = () => setOpenModal(true);
 
@@ -357,21 +326,17 @@ const App = () => {
           <Charts data={chartData} width="100%" height={300} />
         </Box>
       </Paper>
-
       <Target
         targetHours={targetHours}
         onChange={setTargetHours}
         totalOvertimeMinutes={totalOvertimeMinutes}
         onOpenModal={handleOpenModal}
       />
-
-    <Table
-      days={sortedFilteredDays}
-      updateDay={updateDay}
-      removeDay={removeDay}
-    />
-
-      
+      <Table
+        days={sortedFilteredDays}
+        updateDay={updateDay}
+        removeDay={removeDay}
+      />
       <Box
         sx={{
           display: "flex",
@@ -442,15 +407,12 @@ const App = () => {
         onChange={handleImport}
         style={{ display: "none" }}
       />
-
-                  <Forecast
+      <Forecast
         open={openModal}
         onClose={() => setOpenModal(false)}
         targetHours={targetHours}
         missingMinutes={missingMinutes}
-        alternatives={alternatives}
       />
-
     </Box>
   );
 };
