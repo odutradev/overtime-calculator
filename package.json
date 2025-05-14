@@ -1,6 +1,17 @@
 {
   "name": "overtime-calculator",
+  "description": "A web application for recording and calculating overtime hours, allowing the user to track daily and monthly balances, as well as set goals and generate forecasts.",
+  "license": "MIT",
+  "author": "João Dutra <https://github.com/odutradev>",
   "private": true,
+    "repository": {
+    "type": "git",
+    "url": "https://github.com/odutradev/commiter-cli.git"
+  },
+  "homepage": "https://github.com/odutradev/commiter-cli#readme",
+  "bugs": {
+    "url": "https://github.com/odutradev/commiter-cli/issues"
+  },
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -30,5 +41,14 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.22.0",
     "vite": "^6.1.0"
-  }
+  },
+  "keywords": [
+    "overtime",
+    "calculator",
+    "recharts",
+    "react",
+    "mui",
+    "dockerfile",
+    "productivity"
+  ]
 }
