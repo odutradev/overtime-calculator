@@ -28,12 +28,17 @@ import DownloadIcon from "@mui/icons-material/Download";
 import UploadIcon from "@mui/icons-material/UploadFile";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-
-import { calculateOvertime, formatMinutesToHHMM, getYearMonth, formatYearMonth } from "./utils";
+import {
+  calculateOvertime,
+  formatMinutesToHHMM,
+  getYearMonth,
+  formatYearMonth,
+} from "./utils";
 import type { Day } from "./types";
 import Charts from "./components/charts";
-import {ChartData} from "./components/charts/types";
+import { ChartData } from "./components/charts/types";
 import Summary from "./components/summary";
+import OvertimeTarget from "./components/target";
 
 const App = () => {
   const [days, setDays] = useState<Day[]>(() => {
@@ -90,11 +95,13 @@ const App = () => {
     }));
   };
 
-    const chartData: ChartData[] = calculateOvertimeByMonth().map(({ name, value, formattedValue }) => ({
-    name,
-    value,
-    formattedValue,
-  }));
+  const chartData: ChartData[] = calculateOvertimeByMonth().map(
+    ({ name, value, formattedValue }) => ({
+      name,
+      value,
+      formattedValue,
+    })
+  );
 
   const addDay = () => {
     const [selectedYear, selectedMonthNum] = selectedMonth
@@ -245,6 +252,8 @@ const App = () => {
     { label: "30 minutos por dia", minutes: 30 },
   ];
 
+  const handleOpenModal = () => setOpenModal(true);
+
   return (
     <Box
       sx={{
@@ -337,11 +346,6 @@ const App = () => {
             </Select>
           </FormControl>
         </Box>
-        
-
-
-
-
 
         <Box
           sx={{
@@ -351,118 +355,25 @@ const App = () => {
             gap: 3,
           }}
         >
-    <Summary
-      totalOvertimeMinutes={totalOvertimeMinutes}
-      totalNegativeOvertimeMinutes={totalNegativeOvertimeMinutes}
-      monthOvertimeMinutes={monthOvertimeMinutes}
-      monthNegativeOvertimeMinutes={monthNegativeOvertimeMinutes}
-      selectedMonth={selectedMonth}
-    />
-
-
-          <Box
-            sx={{
-              width: "100%",
-              maxWidth: 900,
-              border: "1px solid #333",
-              borderRadius: 2,
-              bgcolor: "#252525",
-              p: 2,
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: "bold",
-                mb: 2,
-                color: "#bbbbbb",
-                textAlign: "center",
-              }}
-            >
-              Distribuição de Horas Extras por Mês
-            </Typography>
-      <Charts
-        data={chartData}
-        width="100%"
-        height={300}
-      />
-          </Box>
-        </Box>
-
-        
-      </Paper>
-      <Paper
-        sx={{
-          width: "100%",
-          maxWidth: 900,
-          mb: 4,
-          borderRadius: 2,
-          overflow: "hidden",
-          bgcolor: "#1e1e1e",
-          border: "1px solid #333",
-          p: 2,
-        }}
-      >
-        <Typography
-          variant="h6"
-          sx={{ fontWeight: "bold", mb: 2, color: "#ffffff" }}
-        >
-          Meta de Horas
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <TextField
-            label="Meta (horas)"
-            type="number"
-            value={targetHours}
-            onChange={(e) =>
-              setTargetHours(
-                e.target.value === "" ? "" : Number(e.target.value)
-              )
-            }
-            variant="standard"
-            InputLabelProps={{ shrink: true }}
-            sx={{
-              "& input": { color: "#e0e0e0" },
-              "& .MuiInput-underline:before": { borderBottomColor: "#555" },
-              "& .MuiInput-underline:hover:not(.Mui-disabled):before": {
-                borderBottomColor: "#777",
-              },
-              "& .MuiInput-underline:after": { borderBottomColor: "#2196F3" },
-              flex: 1,
-            }}
+          <Summary
+            totalOvertimeMinutes={totalOvertimeMinutes}
+            totalNegativeOvertimeMinutes={totalNegativeOvertimeMinutes}
+            monthOvertimeMinutes={monthOvertimeMinutes}
+            monthNegativeOvertimeMinutes={monthNegativeOvertimeMinutes}
+            selectedMonth={selectedMonth}
           />
-          <Box
-            onClick={() => setOpenModal(true)}
-            sx={{
-              cursor: "pointer",
-              p: 2,
-              border: "1px solid #333",
-              borderRadius: 2,
-              bgcolor: "#252525",
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Typography sx={{ color: "#e0e0e0", fontWeight: "bold" }}>
-              Meta: {targetHours !== "" ? `${targetHours} horas` : "---"}
-            </Typography>
-            <Typography sx={{ color: "#e0e0e0", fontWeight: "bold" }}>
-              {targetHours !== ""
-                ? targetMinutes <= totalOvertimeMinutes
-                  ? "Meta Atingida"
-                  : `Faltam: ${formatMinutesToHHMM(
-                      targetMinutes - totalOvertimeMinutes
-                    )}`
-                : "Meta não definida"}
-            </Typography>
-            <Typography sx={{ color: "#2196F3" }}>
-              Clique para ver previsões
-            </Typography>
-          </Box>
+
+          <Charts data={chartData} width="100%" height={300} />
         </Box>
       </Paper>
+
+      <OvertimeTarget
+        targetHours={targetHours}
+        onChange={setTargetHours}
+        totalOvertimeMinutes={totalOvertimeMinutes}
+        onOpenModal={handleOpenModal}
+      />
+
       <TableContainer
         component={Paper}
         sx={{
