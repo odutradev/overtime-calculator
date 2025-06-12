@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { Box, IconButton, Paper, Typography, Tooltip, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import { Box, IconButton, Paper, Typography, Tooltip, FormControl, InputLabel, Select, MenuItem, Switch, FormControlLabel } from "@mui/material";
 import UploadIcon from "@mui/icons-material/UploadFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import AddIcon from "@mui/icons-material/Add";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
 import { calculateOvertime, formatMinutesToHHMM, getYearMonth, formatYearMonth } from "./utils";
 import Forecast from "./components/forecast";
@@ -31,6 +32,10 @@ const App = () => {
     const saved = localStorage.getItem("targetHours");
     return saved !== null ? Number(saved) : "";
   });
+  const [toleranceEnabled, setToleranceEnabled] = useState<boolean>(() => {
+    const saved = localStorage.getItem("toleranceEnabled");
+    return saved !== null ? JSON.parse(saved) : false;
+  });
   const [openModal, setOpenModal] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +51,10 @@ const App = () => {
     }
   }, [targetHours]);
 
+  useEffect(() => {
+    localStorage.setItem("toleranceEnabled", JSON.stringify(toleranceEnabled));
+  }, [toleranceEnabled]);
+
   const calculateOvertimeByMonth = () => {
     const monthlyData: Record<string, number> = {};
     days.forEach((day) => {
@@ -57,7 +66,8 @@ const App = () => {
         day.entrada2 || "13:00",
         day.saida2 || "18:00",
         day.holiday,
-        day.ignored
+        day.ignored,
+        toleranceEnabled
       );
       if (overtimeMinutes > 0) {
         monthlyData[yearMonth] =
@@ -148,7 +158,8 @@ const App = () => {
       day.entrada2 || "13:00",
       day.saida2 || "18:00",
       day.holiday,
-      day.ignored
+      day.ignored,
+      toleranceEnabled
     );
     return sum + overtimeMinutes;
   }, 0);
@@ -159,7 +170,8 @@ const App = () => {
       day.entrada2 || "13:00",
       day.saida2 || "18:00",
       day.holiday,
-      day.ignored
+      day.ignored,
+      toleranceEnabled
     );
     return overtimeMinutes < 0 ? sum + overtimeMinutes : sum;
   }, 0);
@@ -170,7 +182,8 @@ const App = () => {
       day.entrada2 || "13:00",
       day.saida2 || "18:00",
       day.holiday,
-      day.ignored
+      day.ignored,
+      toleranceEnabled
     );
     return sum + overtimeMinutes;
   }, 0);
@@ -181,7 +194,8 @@ const App = () => {
       day.entrada2 || "13:00",
       day.saida2 || "18:00",
       day.holiday,
-      day.ignored
+      day.ignored,
+      toleranceEnabled
     );
     return overtimeMinutes < 0 ? sum + overtimeMinutes : sum;
   }, 0);
@@ -276,51 +290,83 @@ const App = () => {
           <Typography variant="h6" sx={{ fontWeight: "bold" }}>
             Painel de Controle
           </Typography>
-          <FormControl
-            sx={{ minWidth: 220, bgcolor: "#121212", borderRadius: 1 }}
-          >
-            <InputLabel id="month-select-label" sx={{ color: "#9e9e9e" }}>
-              Selecione o Mês
-            </InputLabel>
-            <Select
-              labelId="month-select-label"
-              id="month-select"
-              value={selectedMonth}
-              label="Selecione o Mês"
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              size="small"
-              sx={{
-                color: "#ffffff",
-                ".MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#555",
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#777",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#2196F3",
-                },
-                ".MuiSvgIcon-root": {
-                  color: "#9e9e9e",
-                },
+          <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={toleranceEnabled}
+                  onChange={(e) => setToleranceEnabled(e.target.checked)}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: '#4CAF50',
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: '#4CAF50',
+                    },
+                  }}
+                />
+              }
+              label={
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <AccessTimeIcon sx={{ color: "#9e9e9e", fontSize: "1.2rem" }} />
+                  <Typography sx={{ color: "#e0e0e0", fontSize: "0.9rem" }}>
+                    Tolerância 10min
+                  </Typography>
+                </Box>
+              }
+              sx={{ 
+                margin: 0,
+                '& .MuiFormControlLabel-label': {
+                  fontSize: '0.9rem'
+                }
               }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    bgcolor: "#1e1e1e",
-                    color: "#e0e0e0",
-                    border: "1px solid #333",
-                  },
-                },
-              }}
+            />
+            <FormControl
+              sx={{ minWidth: 220, bgcolor: "#121212", borderRadius: 1 }}
             >
-              {availableMonths.map((month) => (
-                <MenuItem key={month} value={month}>
-                  {formatYearMonth(month)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              <InputLabel id="month-select-label" sx={{ color: "#9e9e9e" }}>
+                Selecione o Mês
+              </InputLabel>
+              <Select
+                labelId="month-select-label"
+                id="month-select"
+                value={selectedMonth}
+                label="Selecione o Mês"
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                size="small"
+                sx={{
+                  color: "#ffffff",
+                  ".MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#555",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#777",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#2196F3",
+                  },
+                  ".MuiSvgIcon-root": {
+                    color: "#9e9e9e",
+                  },
+                }}
+                MenuProps={{
+                  PaperProps: {
+                    sx: {
+                      bgcolor: "#1e1e1e",
+                      color: "#e0e0e0",
+                      border: "1px solid #333",
+                    },
+                  },
+                }}
+              >
+                {availableMonths.map((month) => (
+                  <MenuItem key={month} value={month}>
+                    {formatYearMonth(month)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
         </Box>
 
         <Box
@@ -352,6 +398,7 @@ const App = () => {
         days={sortedFilteredDays}
         updateDay={updateDay}
         removeDay={removeDay}
+        toleranceEnabled={toleranceEnabled}
       />
       <Box
         sx={{

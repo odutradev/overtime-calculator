@@ -10,7 +10,8 @@ export const calculateOvertime = (
   entrada2: string,
   saida2: string,
   holiday: boolean,
-  ignored: boolean = false
+  ignored: boolean = false,
+  toleranceEnabled: boolean = false
 ): { overtimeMinutes: number } => {
   if (ignored) return { overtimeMinutes: 0 };
   
@@ -20,6 +21,11 @@ export const calculateOvertime = (
   if (holiday) return { overtimeMinutes: totalMinutes };
   const standardMinutes = 8 * 60;
   const overtimeMinutes = totalMinutes - standardMinutes;
+  
+  if (toleranceEnabled && Math.abs(overtimeMinutes) < 10) {
+    return { overtimeMinutes: 0 };
+  }
+  
   return { overtimeMinutes };
 };
 

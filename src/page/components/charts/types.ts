@@ -1,4 +1,5 @@
 export interface ChartData {
+  formattedValue: string;
   name: string;
   value: number;
 }

@@ -60,7 +60,8 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
               day.entrada2 || '13:00',
               day.saida2 || '18:00',
               day.holiday,
-              day.ignored
+              day.ignored,
+              false
             );
 
             const isIgnored = day.ignored;
@@ -191,28 +192,50 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
                   </TableCell>
                 ))}
 
-                <TableCell
-                  align="center"
-                  sx={{
-                    color: isIgnored ? '#666' : overtimeMinutes >= 0 ? '#4CAF50' : '#f44336',
-                    fontWeight: 'bold',
-                    borderBottom: '1px solid #333',
-                    position: 'relative',
-                  }}
-                >
-                  {isIgnored ? '---' : formatMinutesToHHMM(overtimeMinutes)}
-                  {isIgnored && (
-                    <VisibilityOffIcon 
-                      sx={{ 
-                        position: 'absolute', 
-                        top: '50%', 
-                        left: '50%', 
-                        transform: 'translate(-50%, -50%)',
-                        opacity: 0.3,
-                        fontSize: '1.2rem'
-                      }} 
-                    />
-                  )}
+                <TableCell align="center" sx={{ borderBottom: '1px solid #333' }}>
+                  <Tooltip 
+                    title={
+                      isIgnored 
+                        ? "Dia ignorado - não conta no cálculo"
+                        : Math.abs(overtimeMinutes) < 10
+                          ? "Dentro da tolerância (±10min) - pode ser ignorado quando ativada"
+                          : overtimeMinutes === 0
+                            ? "Jornada cumprida exatamente - 8 horas trabalhadas"
+                            : overtimeMinutes > 0
+                              ? "Horas extras - tempo trabalhado além das 8 horas"
+                              : "Déficit de horas - tempo trabalhado abaixo das 8 horas"
+                    }
+                  >
+                    <Box
+                      sx={{
+                        color: isIgnored 
+                          ? '#666' 
+                          : Math.abs(overtimeMinutes) < 10 
+                            ? '#FFD700' 
+                            : overtimeMinutes >= 0 
+                              ? '#4CAF50' 
+                              : '#f44336',
+                        fontWeight: 'bold',
+                        position: 'relative',
+                        cursor: 'help',
+                        display: 'inline-block',
+                      }}
+                    >
+                      {isIgnored ? '---' : formatMinutesToHHMM(overtimeMinutes)}
+                      {isIgnored && (
+                        <VisibilityOffIcon 
+                          sx={{ 
+                            position: 'absolute', 
+                            top: '50%', 
+                            left: '50%', 
+                            transform: 'translate(-50%, -50%)',
+                            opacity: 0.3,
+                            fontSize: '1.2rem'
+                          }} 
+                        />
+                      )}
+                    </Box>
+                  </Tooltip>
                 </TableCell>
 
                 <TableCell align="center" sx={{ borderBottom: '1px solid #333' }}>
