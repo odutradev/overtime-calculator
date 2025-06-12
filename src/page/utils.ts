@@ -9,8 +9,11 @@ export const calculateOvertime = (
   saida1: string,
   entrada2: string,
   saida2: string,
-  holiday: boolean
+  holiday: boolean,
+  ignored: boolean = false
 ): { overtimeMinutes: number } => {
+  if (ignored) return { overtimeMinutes: 0 };
+  
   const period1 = timeToMinutes(saida1) - timeToMinutes(entrada1);
   const period2 = timeToMinutes(saida2) - timeToMinutes(entrada2);
   const totalMinutes = period1 + period2;

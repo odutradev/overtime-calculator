@@ -17,7 +17,11 @@ import type { Day } from "./types";
 const App = () => {
   const [days, setDays] = useState<Day[]>(() => {
     const stored = localStorage.getItem("days");
-    return stored ? JSON.parse(stored) : [];
+    const parsedDays = stored ? JSON.parse(stored) : [];
+    return parsedDays.map((day: any) => ({
+      ...day,
+      ignored: day.ignored ?? false
+    }));
   });
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
     const now = new Date();
@@ -52,7 +56,8 @@ const App = () => {
         day.saida1 || "12:00",
         day.entrada2 || "13:00",
         day.saida2 || "18:00",
-        day.holiday
+        day.holiday,
+        day.ignored
       );
       if (overtimeMinutes > 0) {
         monthlyData[yearMonth] =
@@ -104,6 +109,7 @@ const App = () => {
       id: Date.now(),
       date: formattedDate,
       holiday: false,
+      ignored: false,
       entrada1: "09:00",
       saida1: "12:00",
       entrada2: "13:00",
@@ -141,7 +147,8 @@ const App = () => {
       day.saida1 || "12:00",
       day.entrada2 || "13:00",
       day.saida2 || "18:00",
-      day.holiday
+      day.holiday,
+      day.ignored
     );
     return sum + overtimeMinutes;
   }, 0);
@@ -151,7 +158,8 @@ const App = () => {
       day.saida1 || "12:00",
       day.entrada2 || "13:00",
       day.saida2 || "18:00",
-      day.holiday
+      day.holiday,
+      day.ignored
     );
     return overtimeMinutes < 0 ? sum + overtimeMinutes : sum;
   }, 0);
@@ -161,7 +169,8 @@ const App = () => {
       day.saida1 || "12:00",
       day.entrada2 || "13:00",
       day.saida2 || "18:00",
-      day.holiday
+      day.holiday,
+      day.ignored
     );
     return sum + overtimeMinutes;
   }, 0);
@@ -171,7 +180,8 @@ const App = () => {
       day.saida1 || "12:00",
       day.entrada2 || "13:00",
       day.saida2 || "18:00",
-      day.holiday
+      day.holiday,
+      day.ignored
     );
     return overtimeMinutes < 0 ? sum + overtimeMinutes : sum;
   }, 0);
@@ -198,7 +208,13 @@ const App = () => {
     reader.onload = (event) => {
       try {
         const importedDays = JSON.parse(event.target?.result as string);
-        if (Array.isArray(importedDays)) setDays(importedDays);
+        if (Array.isArray(importedDays)) {
+          const normalizedDays = importedDays.map((day: any) => ({
+            ...day,
+            ignored: day.ignored ?? false
+          }));
+          setDays(normalizedDays);
+        }
       } catch (err) {
         console.error("Erro ao importar dados", err);
       }
