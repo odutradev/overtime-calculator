@@ -3,10 +3,11 @@ import { Box, IconButton, Paper, Typography, Tooltip, FormControl, InputLabel, S
 import UploadIcon from "@mui/icons-material/UploadFile";
 import DownloadIcon from "@mui/icons-material/Download";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import AssessmentIcon from "@mui/icons-material/Assessment";
 import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-import { calculateOvertime, formatMinutesToHHMM, getYearMonth, formatYearMonth, exportToPDF } from "./utils";
+import { calculateOvertime, formatMinutesToHHMM, getYearMonth, formatYearMonth, exportToPDF, exportGeneralMetricsToPDF } from "./utils";
 import Forecast from "./components/forecast";
 import Summary from "./components/summary";
 import Charts from "./components/charts";
@@ -253,6 +254,14 @@ const App = () => {
     }
   };
 
+  const handleExportGeneralPDF = () => {
+    try {
+      exportGeneralMetricsToPDF(days, toleranceEnabled);
+    } catch (error) {
+      console.error("Erro ao exportar PDF geral:", error);
+    }
+  };
+
   const targetMinutes = typeof targetHours === "number" ? targetHours * 60 : 0;
   const missingMinutes =
     typeof targetHours === "number"
@@ -477,6 +486,22 @@ const App = () => {
             }}
           >
             <PictureAsPdfIcon fontSize="large" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Exportar relatório geral de métricas PDF">
+          <IconButton
+            onClick={handleExportGeneralPDF}
+            sx={{
+              color: "#9C27B0",
+              bgcolor: "#1a1a1a",
+              "&:hover": {
+                bgcolor: "#333",
+              },
+              p: 1.5,
+              boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+            }}
+          >
+            <AssessmentIcon fontSize="large" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Adicionar dia">

@@ -211,3 +211,147 @@ export const exportToPDF = (
   const fileName = `relatorio_horas_${selectedMonth.replace('-', '_')}.pdf`;
   doc.save(fileName);
 };
+
+export const exportGeneralMetricsToPDF = (
+  days: any[],
+  toleranceEnabled: boolean
+) => {
+  const doc = new (window as any).jspdf.jsPDF();
+  
+  const monthlyData: Record<string, { positive: number; negative: number; total: number }> = {};
+  
+  days.forEach((day) => {
+    const yearMonth = getYearMonth(day.date);
+    if (!yearMonth) return;
+    
+    const { overtimeMinutes } = calculateOvertime(
+      day.entrada1 || "09:00",
+      day.saida1 || "12:00",
+      day.entrada2 || "13:00",
+      day.saida2 || "18:00",
+      day.holiday,
+      day.ignored,
+      toleranceEnabled,
+      day.didNotWork
+    );
+    
+    if (!monthlyData[yearMonth]) {
+      monthlyData[yearMonth] = { positive: 0, negative: 0, total: 0 };
+    }
+    
+    monthlyData[yearMonth].total += overtimeMinutes;
+    
+    if (overtimeMinutes > 0) {
+      monthlyData[yearMonth].positive += overtimeMinutes;
+    } else if (overtimeMinutes < 0) {
+      monthlyData[yearMonth].negative += overtimeMinutes;
+    }
+  });
+  
+  const sortedMonths = Object.keys(monthlyData).sort();
+  
+  let totalPositive = 0;
+  let totalNegative = 0;
+  let totalGeneral = 0;
+  
+  Object.values(monthlyData).forEach(month => {
+    totalPositive += month.positive;
+    totalNegative += month.negative;
+    totalGeneral += month.total;
+  });
+  
+  doc.setFontSize(18);
+  doc.text('Relatório Geral de Métricas', 20, 20);
+  
+  doc.setFontSize(12);
+  doc.text(`Tolerância de 10 minutos: ${toleranceEnabled ? 'Ativada' : 'Desativada'}`, 20, 35);
+  doc.text(`Período: ${sortedMonths.length > 0 ? `${formatYearMonth(sortedMonths[0])} até ${formatYearMonth(sortedMonths[sortedMonths.length - 1])}` : 'Nenhum dado'}`, 20, 45);
+  
+  const headers = [
+    'Mês',
+    'Saldo Positivo',
+    'Saldo Negativo', 
+    'Saldo Total'
+  ];
+  
+  const tableData = sortedMonths.map(month => [
+    formatYearMonth(month),
+    formatMinutesToHHMM(monthlyData[month].positive),
+    formatMinutesToHHMM(monthlyData[month].negative),
+    formatMinutesToHHMM(monthlyData[month].total)
+  ]);
+  
+  doc.autoTable({
+    head: [headers],
+    body: tableData,
+    startY: 60,
+    styles: {
+      fontSize: 10,
+      cellPadding: 3,
+    },
+    headStyles: {
+      fillColor: [44, 44, 44],
+      textColor: [255, 255, 255],
+      fontStyle: 'bold'
+    },
+    bodyStyles: {
+      fillColor: [245, 245, 245],
+      textColor: [0, 0, 0]
+    },
+    alternateRowStyles: {
+      fillColor: [230, 230, 230]
+    },
+    columnStyles: {
+      0: { cellWidth: 50 },
+      1: { cellWidth: 40, halign: 'center' },
+      2: { cellWidth: 40, halign: 'center' },
+      3: { cellWidth: 40, halign: 'center' }
+    },
+    didParseCell: function(data: any) {
+      if (data.section === 'body') {
+        if (data.column.index === 1) {
+          data.cell.styles.textColor = [40, 167, 69];
+        } else if (data.column.index === 2) {
+          data.cell.styles.textColor = [220, 53, 69];
+        } else if (data.column.index === 3) {
+          const cellValue = data.cell.text[0];
+          if (cellValue.startsWith('-')) {
+            data.cell.styles.textColor = [220, 53, 69];
+          } else if (cellValue !== '00:00') {
+            data.cell.styles.textColor = [40, 167, 69];
+          } else {
+            data.cell.styles.textColor = [0, 0, 0];
+          }
+        }
+      }
+    }
+  });
+  
+  const finalY = (doc as any).lastAutoTable.finalY + 25;
+  
+  doc.setFontSize(14);
+  doc.setFont(undefined, 'bold');
+  doc.text('Resumo Geral:', 20, finalY);
+  
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'normal');
+  
+  doc.setTextColor(40, 167, 69);
+  doc.text(`Total de Horas Positivas: ${formatMinutesToHHMM(totalPositive)}`, 20, finalY + 20);
+  
+  doc.setTextColor(220, 53, 69);
+  doc.text(`Total de Horas Negativas: ${formatMinutesToHHMM(totalNegative)}`, 20, finalY + 35);
+  
+  doc.setTextColor(33, 150, 243);
+  doc.text(`Saldo Geral: ${formatMinutesToHHMM(totalGeneral)}`, 20, finalY + 50);
+  
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(10);
+  doc.text(`Total de meses registrados: ${sortedMonths.length}`, 20, finalY + 70);
+  
+  doc.setFontSize(8);
+  doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 20, finalY + 85);
+  
+  const fileName = `relatorio_geral_metricas_${new Date().toISOString().split('T')[0].replace(/-/g, '_')}.pdf`;
+  doc.save(fileName);
+};
