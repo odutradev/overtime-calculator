@@ -66,3 +66,148 @@ export const formatYearMonth = (yearMonth: string): string => {
   ];
   return `${monthNames[parseInt(month) - 1]} de ${year}`;
 };
+
+export const exportToPDF = (
+  days: any[],
+  selectedMonth: string,
+  toleranceEnabled: boolean
+) => {
+  const doc = new (window as any).jspdf.jsPDF();
+  
+  const filteredDays = days.filter(day => getYearMonth(day.date) === selectedMonth);
+  const sortedDays = [...filteredDays].sort((a, b) => a.date.localeCompare(b.date));
+  
+  let positiveTotal = 0;
+  let negativeTotal = 0;
+  let totalBalance = 0;
+  
+  doc.setFontSize(16);
+  doc.text(`Relatório de Horas - ${formatYearMonth(selectedMonth)}`, 20, 20);
+  
+  doc.setFontSize(12);
+  doc.text(`Tolerância de 10 minutos: ${toleranceEnabled ? 'Ativada' : 'Desativada'}`, 20, 35);
+  
+  const headers = [
+    'Data',
+    'Feriado',
+    'Não Trabalhei',
+    'Ignorar',
+    'Entrada 1',
+    'Saída 1',
+    'Entrada 2',
+    'Saída 2',
+    'Saldo'
+  ];
+  
+  const tableData = sortedDays.map(day => {
+    const { overtimeMinutes } = calculateOvertime(
+      day.entrada1 || '09:00',
+      day.saida1 || '12:00',
+      day.entrada2 || '13:00',
+      day.saida2 || '18:00',
+      day.holiday,
+      day.ignored,
+      toleranceEnabled,
+      day.didNotWork
+    );
+    
+    if (!day.ignored) {
+      totalBalance += overtimeMinutes;
+      if (overtimeMinutes > 0) {
+        positiveTotal += overtimeMinutes;
+      } else if (overtimeMinutes < 0) {
+        negativeTotal += overtimeMinutes;
+      }
+    }
+    
+    const formatDate = (dateStr: string) => {
+      const [year, month, day] = dateStr.split('-');
+      return `${day}/${month}/${year}`;
+    };
+    
+    return [
+      formatDate(day.date),
+      day.holiday ? 'Sim' : 'Não',
+      day.didNotWork ? 'Sim' : 'Não',
+      day.ignored ? 'Sim' : 'Não',
+      day.entrada1 || '09:00',
+      day.saida1 || '12:00',
+      day.entrada2 || '13:00',
+      day.saida2 || '18:00',
+      day.ignored ? '---' : formatMinutesToHHMM(overtimeMinutes)
+    ];
+  });
+  
+  let startY = 50;
+  
+  doc.autoTable({
+    head: [headers],
+    body: tableData,
+    startY: startY,
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+    },
+    headStyles: {
+      fillColor: [44, 44, 44],
+      textColor: [255, 255, 255],
+      fontStyle: 'bold'
+    },
+    bodyStyles: {
+      fillColor: [245, 245, 245],
+      textColor: [0, 0, 0]
+    },
+    alternateRowStyles: {
+      fillColor: [230, 230, 230]
+    },
+    columnStyles: {
+      0: { cellWidth: 20 },
+      1: { cellWidth: 15 },
+      2: { cellWidth: 20 },
+      3: { cellWidth: 15 },
+      4: { cellWidth: 18 },
+      5: { cellWidth: 18 },
+      6: { cellWidth: 18 },
+      7: { cellWidth: 18 },
+      8: { cellWidth: 20, halign: 'center' }
+    },
+    didParseCell: function(data: any) {
+      if (data.column.index === 8 && data.section === 'body') {
+        const cellValue = data.cell.text[0];
+        if (cellValue !== '---') {
+          const isNegative = cellValue.startsWith('-');
+          const isPositive = !isNegative && cellValue !== '00:00';
+          
+          if (isNegative) {
+            data.cell.styles.textColor = [220, 53, 69];
+          } else if (isPositive) {
+            data.cell.styles.textColor = [40, 167, 69];
+          }
+        }
+      }
+    }
+  });
+  
+  const finalY = (doc as any).lastAutoTable.finalY + 20;
+  
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'bold');
+  doc.text('Resumo do Mês:', 20, finalY);
+  
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(40, 167, 69);
+  doc.text(`Saldo Positivo: ${formatMinutesToHHMM(positiveTotal)}`, 20, finalY + 15);
+  
+  doc.setTextColor(220, 53, 69);
+  doc.text(`Saldo Negativo: ${formatMinutesToHHMM(negativeTotal)}`, 20, finalY + 25);
+  
+  doc.setTextColor(33, 150, 243);
+  doc.text(`Saldo Total: ${formatMinutesToHHMM(totalBalance)}`, 20, finalY + 35);
+  
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(8);
+  doc.text(`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`, 20, finalY + 50);
+  
+  const fileName = `relatorio_horas_${selectedMonth.replace('-', '_')}.pdf`;
+  doc.save(fileName);
+};

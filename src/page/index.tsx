@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Box, IconButton, Paper, Typography, Tooltip, FormControl, InputLabel, Select, MenuItem, Switch, FormControlLabel } from "@mui/material";
 import UploadIcon from "@mui/icons-material/UploadFile";
 import DownloadIcon from "@mui/icons-material/Download";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import AddIcon from "@mui/icons-material/Add";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-import { calculateOvertime, formatMinutesToHHMM, getYearMonth, formatYearMonth } from "./utils";
+import { calculateOvertime, formatMinutesToHHMM, getYearMonth, formatYearMonth, exportToPDF } from "./utils";
 import Forecast from "./components/forecast";
 import Summary from "./components/summary";
 import Charts from "./components/charts";
@@ -244,6 +245,14 @@ const App = () => {
     reader.readAsText(file);
   };
 
+  const handleExportPDF = () => {
+    try {
+      exportToPDF(days, selectedMonth, toleranceEnabled);
+    } catch (error) {
+      console.error("Erro ao exportar PDF:", error);
+    }
+  };
+
   const targetMinutes = typeof targetHours === "number" ? targetHours * 60 : 0;
   const missingMinutes =
     typeof targetHours === "number"
@@ -422,7 +431,7 @@ const App = () => {
           width: "100%",
         }}
       >
-        <Tooltip title="Exportar dados">
+        <Tooltip title="Exportar dados JSON">
           <IconButton
             onClick={handleExport}
             sx={{
@@ -438,7 +447,7 @@ const App = () => {
             <DownloadIcon fontSize="large" />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Importar dados">
+        <Tooltip title="Importar dados JSON">
           <IconButton
             onClick={handleImportClick}
             sx={{
@@ -452,6 +461,22 @@ const App = () => {
             }}
           >
             <UploadIcon fontSize="large" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Exportar relatório PDF do mês">
+          <IconButton
+            onClick={handleExportPDF}
+            sx={{
+              color: "#FF5722",
+              bgcolor: "#1a1a1a",
+              "&:hover": {
+                bgcolor: "#333",
+              },
+              p: 1.5,
+              boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+            }}
+          >
+            <PictureAsPdfIcon fontSize="large" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Adicionar dia">
