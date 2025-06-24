@@ -1,6 +1,7 @@
 export interface Day {
     holiday: boolean;
     ignored: boolean;
+    didNotWork: boolean;
     entrada1: string;
     entrada2: string;
     saida1: string;

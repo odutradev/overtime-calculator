@@ -21,7 +21,8 @@ const App = () => {
     const parsedDays = stored ? JSON.parse(stored) : [];
     return parsedDays.map((day: any) => ({
       ...day,
-      ignored: day.ignored ?? false
+      ignored: day.ignored ?? false,
+      didNotWork: day.didNotWork ?? false
     }));
   });
   const [selectedMonth, setSelectedMonth] = useState<string>(() => {
@@ -67,7 +68,8 @@ const App = () => {
         day.saida2 || "18:00",
         day.holiday,
         day.ignored,
-        toleranceEnabled
+        toleranceEnabled,
+        day.didNotWork
       );
       if (overtimeMinutes > 0) {
         monthlyData[yearMonth] =
@@ -120,6 +122,7 @@ const App = () => {
       date: formattedDate,
       holiday: false,
       ignored: false,
+      didNotWork: false,
       entrada1: "09:00",
       saida1: "12:00",
       entrada2: "13:00",
@@ -159,7 +162,8 @@ const App = () => {
       day.saida2 || "18:00",
       day.holiday,
       day.ignored,
-      toleranceEnabled
+      toleranceEnabled,
+      day.didNotWork
     );
     return sum + overtimeMinutes;
   }, 0);
@@ -171,7 +175,8 @@ const App = () => {
       day.saida2 || "18:00",
       day.holiday,
       day.ignored,
-      toleranceEnabled
+      toleranceEnabled,
+      day.didNotWork
     );
     return overtimeMinutes < 0 ? sum + overtimeMinutes : sum;
   }, 0);
@@ -183,7 +188,8 @@ const App = () => {
       day.saida2 || "18:00",
       day.holiday,
       day.ignored,
-      toleranceEnabled
+      toleranceEnabled,
+      day.didNotWork
     );
     return sum + overtimeMinutes;
   }, 0);
@@ -195,7 +201,8 @@ const App = () => {
       day.saida2 || "18:00",
       day.holiday,
       day.ignored,
-      toleranceEnabled
+      toleranceEnabled,
+      day.didNotWork
     );
     return overtimeMinutes < 0 ? sum + overtimeMinutes : sum;
   }, 0);
@@ -225,7 +232,8 @@ const App = () => {
         if (Array.isArray(importedDays)) {
           const normalizedDays = importedDays.map((day: any) => ({
             ...day,
-            ignored: day.ignored ?? false
+            ignored: day.ignored ?? false,
+            didNotWork: day.didNotWork ?? false
           }));
           setDays(normalizedDays);
         }

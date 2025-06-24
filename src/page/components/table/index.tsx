@@ -2,13 +2,14 @@ import { TableContainer, Paper, Table as CustomTable, TableHead, TableRow, Table
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import EventBusyIcon from '@mui/icons-material/EventBusy';
+import WorkOffIcon from '@mui/icons-material/WorkOff';
 
 import { calculateOvertime, formatMinutesToHHMM } from '../../utils';
 
 import type { OvertimeTableProps } from './types';
 import type { Day } from '../../types';
 
-const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
+const Table = ({ days, updateDay, removeDay, toleranceEnabled }: OvertimeTableProps) => {
   const dateCounts = days.reduce((acc, day) => {
     acc[day.date] = (acc[day.date] || 0) + 1;
     return acc;
@@ -21,7 +22,7 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
       component={Paper}
       sx={{
         mt: 2,
-        maxWidth: 1000,
+        maxWidth: 1200,
         bgcolor: '#1e1e1e',
         border: '1px solid #333',
         borderRadius: 2,
@@ -34,6 +35,7 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
             {[
               'Data',
               'Feriado',
+              'Não Trabalhei',
               'Ignorar',
               'Entrada 1',
               'Saída 1',
@@ -61,10 +63,12 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
               day.saida2 || '18:00',
               day.holiday,
               day.ignored,
-              false
+              toleranceEnabled,
+              day.didNotWork
             );
 
             const isIgnored = day.ignored;
+            const isDidNotWork = day.didNotWork;
             const isDuplicated = dateCounts[day.date] > 1;
 
             return (
@@ -102,7 +106,7 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
                     value={day.date}
                     onChange={(e) => updateDay(day.id, 'date', e.target.value)}
                     variant="standard"
-                    disabled={isIgnored}
+                    disabled={isIgnored || isDidNotWork}
                     sx={{
                       '& input': { color: '#e0e0e0' },
                       '& .MuiInput-underline:before': { borderBottomColor: '#555' },
@@ -132,13 +136,32 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
                       <Checkbox
                         checked={day.holiday}
                         onChange={(e) => updateDay(day.id, 'holiday', e.target.checked)}
-                        disabled={isIgnored}
+                        disabled={isIgnored || isDidNotWork}
                         icon={<EventBusyIcon />}
                         checkedIcon={<EventBusyIcon />}
                         sx={{ 
                           color: '#666', 
                           '&.Mui-checked': { color: '#FF9800' },
                           '&:hover': { bgcolor: 'rgba(255, 152, 0, 0.1)' }
+                        }}
+                      />
+                    </Box>
+                  </Tooltip>
+                </TableCell>
+
+                <TableCell align="center" sx={{ borderBottom: '1px solid #333' }}>
+                  <Tooltip title={day.didNotWork ? "Não trabalhei neste dia (-8h)" : "Marcar que não trabalhei"}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Checkbox
+                        checked={day.didNotWork}
+                        onChange={(e) => updateDay(day.id, 'didNotWork', e.target.checked)}
+                        disabled={isIgnored}
+                        icon={<WorkOffIcon />}
+                        checkedIcon={<WorkOffIcon />}
+                        sx={{ 
+                          color: '#666', 
+                          '&.Mui-checked': { color: '#f44336' },
+                          '&:hover': { bgcolor: 'rgba(244, 67, 54, 0.1)' }
                         }}
                       />
                     </Box>
@@ -181,7 +204,7 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
                       }
                       inputProps={{ step: 300 }}
                       variant="standard"
-                      disabled={isIgnored}
+                      disabled={isIgnored || isDidNotWork}
                       sx={{
                         '& input': { color: '#e0e0e0' },
                         '& .MuiInput-underline:before': { borderBottomColor: '#555' },
@@ -197,6 +220,8 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
                     title={
                       isIgnored 
                         ? "Dia ignorado - não conta no cálculo"
+                        : isDidNotWork
+                          ? "Não trabalhei neste dia - 8 horas negativas"
                         : Math.abs(overtimeMinutes) < 10
                           ? "Dentro da tolerância (±10min) - pode ser ignorado quando ativada"
                           : overtimeMinutes === 0
@@ -210,11 +235,13 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
                       sx={{
                         color: isIgnored 
                           ? '#666' 
-                          : Math.abs(overtimeMinutes) < 10 
-                            ? '#FFD700' 
-                            : overtimeMinutes >= 0 
-                              ? '#4CAF50' 
-                              : '#f44336',
+                          : isDidNotWork
+                            ? '#f44336'
+                            : Math.abs(overtimeMinutes) < 10 
+                              ? '#FFD700' 
+                              : overtimeMinutes >= 0 
+                                ? '#4CAF50' 
+                                : '#f44336',
                         fontWeight: 'bold',
                         position: 'relative',
                         cursor: 'help',
@@ -224,6 +251,18 @@ const Table = ({ days, updateDay, removeDay }: OvertimeTableProps) => {
                       {isIgnored ? '---' : formatMinutesToHHMM(overtimeMinutes)}
                       {isIgnored && (
                         <VisibilityOffIcon 
+                          sx={{ 
+                            position: 'absolute', 
+                            top: '50%', 
+                            left: '50%', 
+                            transform: 'translate(-50%, -50%)',
+                            opacity: 0.3,
+                            fontSize: '1.2rem'
+                          }} 
+                        />
+                      )}
+                      {isDidNotWork && !isIgnored && (
+                        <WorkOffIcon 
                           sx={{ 
                             position: 'absolute', 
                             top: '50%', 
